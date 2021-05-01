@@ -20,7 +20,7 @@ class Discriminator(nn.Module):
         return nn.Sequential(
             nn.Conv2d(
                 in_channels,
-                out_channels,
+                out_channels, hello
                 kernel_size,
                 stride,
                 padding,

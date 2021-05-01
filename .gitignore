@@ -4,5 +4,6 @@ dataset/
 logs/
 __pycache__/
 audio_images_cropped/
+audio_image_test/
 
 output.wav

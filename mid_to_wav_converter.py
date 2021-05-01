@@ -14,7 +14,7 @@ from PIL import Image
 import time
 
 import scipy.io.wavfile
-rate,audData=scipy.io.wavfile.read('audio_files/0_0.wav')
+rate,audData=scipy.io.wavfile.read("never-gonna-give-you-up.wav")
 audData.shape[0] / rate / 60
 
 channel1=audData[:,0] #left
@@ -122,6 +122,7 @@ def generateSpectrogramForWave(signal):
 def recoverSignalFromSpectrogram(filePath, track_id):
     img = Image.open(filePath)
     data = np.array( img, dtype='uint8' )
+    #print(data)
     width = data.shape[1]
     height = data.shape[0]
 
@@ -147,31 +148,19 @@ import mutagen
 from mutagen.wave import WAVE
 import os
 
-#Convert midi file to .wav file
-fs = FluidSynth("Piano.SF2")
 
-abs_path = "/mnt/c/Users/fawaz/Music/lmd_full/lmd_full/0/"
-zero_songs = os.listdir("/mnt/c/Users/fawaz/Music/lmd_full/lmd_full/0")
-#for k in range(1):
-for k in range(len(zero_songs)):
-    fs.midi_to_audio((abs_path + zero_songs[k]), 'output.wav')
 
-    try:
-        audio = WAVE("output.wav")
-    except:
-        print("No Output file found")
-        continue
+def single_run():
 
-    #audio = WAVE("never-gonna-give-you-up.wav")
+    audio = WAVE("never-gonna-give-you-up.wav")
     audio_info = audio.info
     song_duration = int(audio_info.length)
-
 
     for i in range(int(song_duration/5) + 1):
         t1 = i * 5000
         t2 = (i+1) * 5000
-        new_audio = AudioSegment.from_wav("output.wav")
-        #new_audio = AudioSegment.from_wav("never-gonna-give-you-up.wav")
+        #new_audio = AudioSegment.from_wav("output.wav")
+        new_audio = AudioSegment.from_wav("never-gonna-give-you-up.wav")
         new_audio = new_audio[t1:t2]
         new_audio.export(("audio_files/" + str(i) + ".wav"), format="wav")
     
@@ -183,12 +172,77 @@ for k in range(len(zero_songs)):
 
         channel_final = np.mean( np.array([ channel1, channel2 ]), axis=0 )
         signal_fragment = np.asarray(channel_final)
-
+        
+        for j in range (len(signal_fragment)):
+            if(signal_fragment[j] == None):
+                print("Error :/")
+        
         try:
             img = generateSpectrogramForWave(signal_fragment)
             #scipy.io.wavfile.write("/input/before.wav", rate, signal_fragment)
-            img.save("audio_images/" + str(k) + "_" + str(i) + ".png","PNG")
-            if(k % 8 == 0):
-                recoverSignalFromSpectrogram("audio_images/" + str(k) + "_" + str(i) + ".png", i)
+            img.save("audio_image_test/" + str(999) + "_" + str(i) + ".png","PNG")
+            # if(k % 8 == 0):
+            #recoverSignalFromSpectrogram("audio_image_test/" + str(999) + "_" + str(i) + ".png", i)
         except:
             print("Error Generating Last Image, probably an even number")
+        break
+
+
+def recover_audio(file_path, num):
+    recoverSignalFromSpectrogram(file_path, num)
+
+def mega_run():
+    #Convert midi file to .wav file
+    fs = FluidSynth("Piano.SF2")
+
+    abs_path = "/mnt/c/Users/fawaz/Music/lmd_full/lmd_full/0/"
+    zero_songs = os.listdir("/mnt/c/Users/fawaz/Music/lmd_full/lmd_full/0")
+    #for k in range(1):
+    for k in range(len(zero_songs)):
+        fs.midi_to_audio((abs_path + zero_songs[k]), 'output.wav')
+
+        try:
+            audio = WAVE("output.wav")
+        except:
+            print("No Output file found")
+            continue
+
+        #audio = WAVE("never-gonna-give-you-up.wav")
+        audio_info = audio.info
+        song_duration = int(audio_info.length)
+
+
+        for i in range(int(song_duration/5) + 1):
+            t1 = i * 5000
+            t2 = (i+1) * 5000
+            new_audio = AudioSegment.from_wav("output.wav")
+            #new_audio = AudioSegment.from_wav("never-gonna-give-you-up.wav")
+            new_audio = new_audio[t1:t2]
+            new_audio.export(("audio_files/" + str(i) + ".wav"), format="wav")
+        
+            rate,audData=scipy.io.wavfile.read('audio_files/' + str(i) + '.wav')
+            audData.shape[0] / rate / 60
+
+            channel1=audData[:,0] #left
+            channel2=audData[:,1] #right
+
+            channel_final = np.mean( np.array([ channel1, channel2 ]), axis=0 )
+            signal_fragment = np.asarray(channel_final)
+
+
+
+            try:
+                img = generateSpectrogramForWave(signal_fragment)
+                #scipy.io.wavfile.write("/input/before.wav", rate, signal_fragment)
+                img.save("audio_images/" + str(k) + "_" + str(i) + ".png","PNG")
+                if(k % 8 == 0):
+                    recoverSignalFromSpectrogram("audio_images/" + str(k) + "_" + str(i) + ".png", i)
+            except:
+                print("Error Generating Last Image, probably an even number")
+
+
+
+
+single_run()
+recover_audio("audio_image_test/" + str(999) + "_" + str(1) + ".png", 999)
+recover_audio("audio_image_test/999_1_mod.png", 1000)
