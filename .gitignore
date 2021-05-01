@@ -1,0 +1,8 @@
+audio_files/
+audio_images_raw/
+dataset/
+logs/
+__pycache__/
+audio_images_cropped/
+
+output.wav
