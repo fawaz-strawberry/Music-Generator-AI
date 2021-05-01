@@ -18,9 +18,9 @@ class Discriminator(nn.Module):
 
     def _block(self, in_channels, out_channels, kernel_size, stride, padding):
         return nn.Sequential(
-            nn.Conv2d(
+            nn.Conv2d( 
                 in_channels,
-                out_channels, hello
+                out_channels, 
                 kernel_size,
                 stride,
                 padding,

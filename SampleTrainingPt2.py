@@ -13,7 +13,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 LEARNING_RATE = 2e-4
 BATCH_SIZE = 128
 IMAGE_SIZE = 64
-CHANNELS_IMG = 1
+CHANNELS_IMG = 3
 
 NOISE_DIM = 10
 Z_DIM = 100
@@ -23,14 +23,15 @@ FEATURES_GEN = 64
 
 transforms = transforms.Compose(
     [
-        transforms.Resize(IMAGE_SIZE),
+        #transforms.Resize(IMAGE_SIZE),
         transforms.ToTensor(),
         transforms.Normalize(
             [0.5 for _ in range(CHANNELS_IMG)], [0.5 for _ in range(CHANNELS_IMG)])
     ]
 )
 
-dataset = datasets.MNIST(root="dataset/", train=True, transform=transforms, download=True)
+#dataset = datasets.MNIST(root="dataset/", train=True, transform=transforms, download=True)
+dataset = datasets.ImageFolder(root="audio_images_cropped", transform=transforms, train=False)
 loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 gen = Generator(Z_DIM, CHANNELS_IMG, FEATURES_GEN).to(device)
 disc = Discriminator(CHANNELS_IMG, FEATURES_DISC).to(device)
@@ -43,8 +44,8 @@ opt_disc = optim.Adam(disc.parameters(), lr=LEARNING_RATE, betas=(0.5, 0.999))
 criterion = nn.BCELoss()
 
 fixed_noise = torch.randn(32, Z_DIM, 1, 1).to(device)
-writer_real = SummaryWriter(f"logs/real")
-writer_fake = SummaryWriter(f"logs/fake")
+writer_real = SummaryWriter(f"musical_logs/real")
+writer_fake = SummaryWriter(f"musical_logs/fake")
 step = 0
 
 gen.train()
