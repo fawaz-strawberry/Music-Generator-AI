@@ -13,7 +13,6 @@ import numpy as np
 
 #hyper params
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = torch.device("cpu")
 LEARNING_RATE = 2e-4
 BATCH_SIZE = 128
 IMAGE_SIZE = 64
