@@ -8,6 +8,16 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from NetworkArchitectureAudio import Discriminator, Generator, initialize_weights
 import os
+
+def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
+    print("=> Saving Checkpoint")
+    torch.save(state, filename)
+
+def load_checkpoint(checkpoint):
+    print("=> Loading Checkpoint")
+    model.load_state_dict(checkpoint['state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer'])
+
 #hyper params
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device = torch.device("cpu")
@@ -53,6 +63,11 @@ gen.train()
 disc.train()
 
 for epoch in range(NUM_EPOCHS):
+
+    if(epoch % 2 == 0):
+        checkpoint = {'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()}
+        save_checkpoint(checkpoint)
+
     for batch_idx, (real, _) in enumerate(loader):
         real = real.to(device)
         noise = torch.randn((BATCH_SIZE, Z_DIM, 1, 1)).to(device)

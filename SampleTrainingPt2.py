@@ -7,31 +7,53 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from NetworkArchitecture import Discriminator, Generator, initialize_weights
+import time
+import matplotlib.pyplot as plt
+import numpy as np
 
 #hyper params
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 LEARNING_RATE = 2e-4
 BATCH_SIZE = 128
 IMAGE_SIZE = 64
-CHANNELS_IMG = 3
+CHANNELS_IMG = 1
 
 NOISE_DIM = 10
 Z_DIM = 100
 NUM_EPOCHS = 5
 FEATURES_DISC = 64
 FEATURES_GEN = 64
+LOAD_PARAMS = False
+
+
+#Sample checkpoint
+'''
+checkpoint = {"gen_state_dict": gen.state_dict(), 'gen_opt': opt_gen.state_dict()
+        "disc_state_dict": disc.state_dict(), 'disc_opt':opt_disc.state_dict()}
+'''
+def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
+    print("=> Saving Checkpoint")
+    torch.save(state, filename)
+
+def load_checkpoint(checkpoint):
+    print("=> Loading Checkpoint")
+    gen.load_state_dict(checkpoint['gen_state_dict'])
+    opt_gen.load_state_dict(checkpoint['gen_opt'])
+    disc.load_state_dict(checkpoint['disc_state_dict'])
+    disc_opt.load_state_dict(checkpoint['disc_opt'])
 
 transforms = transforms.Compose(
     [
-        #transforms.Resize(IMAGE_SIZE),
+        transforms.Resize(IMAGE_SIZE),
         transforms.ToTensor(),
         transforms.Normalize(
             [0.5 for _ in range(CHANNELS_IMG)], [0.5 for _ in range(CHANNELS_IMG)])
     ]
 )
 
-#dataset = datasets.MNIST(root="dataset/", train=True, transform=transforms, download=True)
-dataset = datasets.ImageFolder(root="audio_images_cropped", transform=transforms, train=False)
+dataset = datasets.MNIST(root="dataset/", train=True, transform=transforms, download=True)
+#dataset = datasets.ImageFolder(root="audio_images_cropped", transform=transforms, train=False)
 loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 gen = Generator(Z_DIM, CHANNELS_IMG, FEATURES_GEN).to(device)
 disc = Discriminator(CHANNELS_IMG, FEATURES_DISC).to(device)
@@ -51,7 +73,18 @@ step = 0
 gen.train()
 disc.train()
 
+if(LOAD_PARAMS):
+    load_checkpoint("my_checkpoint.pth.tar")
+
 for epoch in range(NUM_EPOCHS):
+
+    
+    if (epoch % 2 == 0):
+        checkpoint = {"gen_state_dict": gen.state_dict(), 'gen_opt': opt_gen.state_dict(),
+        "disc_state_dict": disc.state_dict(), 'disc_opt':opt_disc.state_dict()}
+        save_checkpoint(checkpoint)
+
+
     for batch_idx, (real, _) in enumerate(loader):
         real = real.to(device)
         noise = torch.randn((BATCH_SIZE, Z_DIM, 1, 1)).to(device)
@@ -74,6 +107,8 @@ for epoch in range(NUM_EPOCHS):
         loss_gen.backward()
         opt_gen.step()
 
+        
+
         #Print losses occasionally and print to tensorboard
         if batch_idx % 100 == 0:
             print(
@@ -83,6 +118,12 @@ for epoch in range(NUM_EPOCHS):
 
             with torch.no_grad():
                 fake = gen(fixed_noise)
+
+                if batch_idx % 500 == 0:
+                    images = fake.cpu().numpy()
+                    final_image = np.squeeze(images[0])
+                    plt.imshow(final_image)
+                    plt.show()
 
                 img_grid_real = torchvision.utils.make_grid(
                     real[:32], normalize=True
