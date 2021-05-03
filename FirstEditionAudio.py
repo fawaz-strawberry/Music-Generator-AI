@@ -9,16 +9,16 @@ from torch.utils.tensorboard import SummaryWriter
 from NetworkArchitectureAudio import Discriminator, Generator, initialize_weights
 import os
 #hyper params
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = torch.device("cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cpu")
 LEARNING_RATE = 2e-4
-BATCH_SIZE = 128
+BATCH_SIZE = 16
 IMAGE_SIZE = (430, 153)
 CHANNELS_IMG = 3
 
 NOISE_DIM = 10
 Z_DIM = 100
-NUM_EPOCHS = 5
+NUM_EPOCHS = 10
 FEATURES_DISC = 64
 FEATURES_GEN = 64
 
@@ -84,6 +84,8 @@ for epoch in range(NUM_EPOCHS):
 
             with torch.no_grad():
                 fake = gen(fixed_noise)
+
+                # print(fake[:1].to)
 
                 img_grid_real = torchvision.utils.make_grid(
                     real[:32], normalize=True
