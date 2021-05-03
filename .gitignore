@@ -5,5 +5,7 @@ logs/
 __pycache__/
 audio_images_cropped/
 audio_image_test/
+GeneratedAudio/
 
 output.wav
+audio_images_cropped.rar

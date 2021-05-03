@@ -8,6 +8,24 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from NetworkArchitectureAudio import Discriminator, Generator, initialize_weights
 import os
+
+#Sample checkpoint
+'''
+checkpoint = {"gen_state_dict": gen.state_dict(), 'gen_opt': opt_gen.state_dict()
+        "disc_state_dict": disc.state_dict(), 'disc_opt':opt_disc.state_dict()}
+'''
+def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
+    print("=> Saving Checkpoint")
+    torch.save(state, filename)
+
+def load_checkpoint(filename="my_checkpoint.pth.tar"):
+    print("=> Loading Checkpoint")
+    checkpoint = torch.load(filename)
+    gen.load_state_dict(checkpoint['gen_state_dict'])
+    opt_gen.load_state_dict(checkpoint['gen_opt'])
+    disc.load_state_dict(checkpoint['disc_state_dict'])
+    disc_opt.load_state_dict(checkpoint['disc_opt'])
+
 #hyper params
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #device = torch.device("cpu")
@@ -21,6 +39,7 @@ Z_DIM = 100
 NUM_EPOCHS = 10
 FEATURES_DISC = 64
 FEATURES_GEN = 64
+LOAD_PARAMS = false
 
 transforms = transforms.Compose(
     [
@@ -52,7 +71,16 @@ step = 0
 gen.train()
 disc.train()
 
+if(LOAD_PARAMS):
+    load_checkpoint("my_checkpoint.pth.tar")
+
 for epoch in range(NUM_EPOCHS):
+
+    if (epoch % 2 == 0):
+        checkpoint = {"gen_state_dict": gen.state_dict(), 'gen_opt': opt_gen.state_dict(),
+        "disc_state_dict": disc.state_dict(), 'disc_opt':opt_disc.state_dict()}
+        save_checkpoint(checkpoint)
+
     for batch_idx, (real, _) in enumerate(loader):
         real = real.to(device)
         noise = torch.randn((BATCH_SIZE, Z_DIM, 1, 1)).to(device)

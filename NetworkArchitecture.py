@@ -63,10 +63,6 @@ class Generator(nn.Module):
         )
 
     def forward(self, x):
-
-        print("X SHAPE IS: ")
-        print(x.shape)
-
         return self.gen(x)
 
 def initialize_weights(model):
