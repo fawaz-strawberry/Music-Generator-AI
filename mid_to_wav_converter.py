@@ -62,15 +62,22 @@ def recoverLinearScale(rgbArray, magnitudeMin, magnitudeMax,
                        phaseMin, phaseMax):
     width = rgbArray.shape[1]
     height = rgbArray.shape[0]
+
     magnitudeVals = rgbArray[:,:,0].astype(float) + rgbArray[:,:,1].astype(float)
+    
     phaseVals = rgbArray[:,:,2].astype(float)
+    
     phaseRange = phaseMax - phaseMin
     magnitudeRange = magnitudeMax - magnitudeMin
+
+
+
     for w in range(width):
         for h in range(height):
             phaseVals[h,w] = (phaseVals[h,w] / 255 * phaseRange) + phaseMin
             magnitudeVals[h,w] = weakenAmplifiedMagnitude(magnitudeVals[h,w])
             magnitudeVals[h,w] = (magnitudeVals[h,w] / (255*2) * magnitudeRange) + magnitudeMin
+
     return magnitudeVals, phaseVals
 
 def generateSpectrogramForWave(signal):
@@ -128,7 +135,6 @@ def recoverSignalFromSpectrogram(filePath, track_id):
 
     magnitudeVals, phaseVals \
     = recoverLinearScale(data, magnitudeMin, magnitudeMax, phaseMin, phaseMax)
-    
     recovered = np.zeros(WINDOW_LENGTH * width // 2 + WINDOW_STEP, dtype=np.int16)
     for w in range(width):
         toInverse = np.zeros(height, dtype=np.complex_)
@@ -243,6 +249,13 @@ def mega_run():
 
 
 
+# single_run()
+# recover_audio("audio_image_test/" + str(999) + "_" + str(1) + ".png", 999)
+
 single_run()
-recover_audio("audio_image_test/" + str(999) + "_" + str(1) + ".png", 999)
-recover_audio("audio_image_test/999_1_mod.png", 1000)
+
+for i in range(100):
+    recover_audio(("FinalGeneratedAudio/" + "THE_REAL_FINAL_OUTPUT_WAVS/output_" + str(i) + ".png"), i)
+
+#single_run()
+#recover_audio("FinalGeneratedAudio/0_0.png", 1001)

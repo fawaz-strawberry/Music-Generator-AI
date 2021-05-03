@@ -9,18 +9,26 @@ from torch.utils.tensorboard import SummaryWriter
 from NetworkArchitectureAudio import Discriminator, Generator, initialize_weights
 import os
 
+#Sample checkpoint
+'''
+checkpoint = {"gen_state_dict": gen.state_dict(), 'gen_opt': opt_gen.state_dict()
+        "disc_state_dict": disc.state_dict(), 'disc_opt':opt_disc.state_dict()}
+'''
 def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
     print("=> Saving Checkpoint")
     torch.save(state, filename)
 
-def load_checkpoint(checkpoint):
+def load_checkpoint(filename="my_checkpoint.pth.tar"):
     print("=> Loading Checkpoint")
-    model.load_state_dict(checkpoint['state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer'])
+    checkpoint = torch.load(filename)
+    gen.load_state_dict(checkpoint['gen_state_dict'])
+    opt_gen.load_state_dict(checkpoint['gen_opt'])
+    disc.load_state_dict(checkpoint['disc_state_dict'])
+    disc_opt.load_state_dict(checkpoint['disc_opt'])
 
 #hyper params
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = torch.device("cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cpu")
 LEARNING_RATE = 2e-4
 BATCH_SIZE = 128
 IMAGE_SIZE = (430, 153)
@@ -31,6 +39,7 @@ Z_DIM = 100
 NUM_EPOCHS = 5
 FEATURES_DISC = 64
 FEATURES_GEN = 64
+LOAD_PARAMS = false
 
 transforms = transforms.Compose(
     [
@@ -62,10 +71,14 @@ step = 0
 gen.train()
 disc.train()
 
+if(LOAD_PARAMS):
+    load_checkpoint("my_checkpoint.pth.tar")
+
 for epoch in range(NUM_EPOCHS):
 
-    if(epoch % 2 == 0):
-        checkpoint = {'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()}
+    if (epoch % 2 == 0):
+        checkpoint = {"gen_state_dict": gen.state_dict(), 'gen_opt': opt_gen.state_dict(),
+        "disc_state_dict": disc.state_dict(), 'disc_opt':opt_disc.state_dict()}
         save_checkpoint(checkpoint)
 
     for batch_idx, (real, _) in enumerate(loader):

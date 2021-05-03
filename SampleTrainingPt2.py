@@ -10,11 +10,12 @@ from NetworkArchitecture import Discriminator, Generator, initialize_weights
 import time
 import matplotlib.pyplot as plt
 import numpy as np
+from PIL import Image
 
 #hyper params
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 LEARNING_RATE = 2e-4
-BATCH_SIZE = 128
+BATCH_SIZE = 32
 IMAGE_SIZE = 64
 CHANNELS_IMG = 1
 
@@ -35,8 +36,9 @@ def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
     print("=> Saving Checkpoint")
     torch.save(state, filename)
 
-def load_checkpoint(checkpoint):
+def load_checkpoint(filename="my_checkpoint.pth.tar"):
     print("=> Loading Checkpoint")
+    checkpoint = torch.load(filename)
     gen.load_state_dict(checkpoint['gen_state_dict'])
     opt_gen.load_state_dict(checkpoint['gen_opt'])
     disc.load_state_dict(checkpoint['disc_state_dict'])
@@ -120,7 +122,13 @@ for epoch in range(NUM_EPOCHS):
 
                 if batch_idx % 500 == 0:
                     images = fake.cpu().numpy()
-                    final_image = np.squeeze(images[0])
+                    final_image = np.squeeze(images[0]) * 255
+                    im = Image.fromarray(final_image)
+
+
+                    if(im.mode != "L"):
+                        im = im.convert('L')
+                    im.save("test.png")
                     plt.imshow(final_image)
                     plt.show()
 

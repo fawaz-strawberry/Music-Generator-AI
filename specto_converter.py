@@ -4,7 +4,7 @@ from PIL import Image
 import time
 
 import scipy.io.wavfile
-rate,audData=scipy.io.wavfile.read('audio_files/0_0.wav')
+rate,audData=scipy.io.wavfile.read('audio_files/0_1.wav')
 audData.shape[0] / rate / 60
 
 channel1=audData[:,0] #left
@@ -124,13 +124,14 @@ def recoverSignalFromSpectrogram(filePath):
             toInverse[h] = magnitude * math.cos(phase) + (1j * magnitude * math.sin(phase))
         signal = np.fft.irfft(toInverse)
         recovered[w*WINDOW_STEP:w*WINDOW_STEP + WINDOW_LENGTH] += signal[:WINDOW_LENGTH].astype(np.int16)
-    scipy.io.wavfile.write("/input/recovered.wav", rate, recovered)
+    scipy.io.wavfile.write("recovered.wav", rate, recovered)
 
 
 
-# img = generateSpectrogramForWave(signal_fragment)
-# scipy.io.wavfile.write("/input/before.wav", rate, signal_fragment)
-# img.save("0_0.png","PNG")
+img = generateSpectrogramForWave(signal_fragment)
+scipy.io.wavfile.write("before.wav", rate, signal_fragment)
+img.save("0_0.png","PNG")
+recoverSignalFromSpectrogram("FinalGeneratedAudio/0_0.png")
 
 # generateSpectrogramForWave(signal_fragment)
-recoverSignalFromSpectrogram("audio_images/0_0.png")
+# 
